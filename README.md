@@ -9,6 +9,16 @@
 
 ## 组件使用方法
 ### 0.去极验验证码官网注册账号，获取ID和KEY
+01. 进入官网注册账号[点我跳转官网地址](https://docs.geetest.com/)  
+02. 注册完后点击后台登陆，登陆成功后进入后台，点击行为验证  
+![极验流程1.png](https://i.loli.net/2019/01/28/5c4e9252864cd.png)  
+03.点击新增验证  
+![新增验证.png](https://i.loli.net/2019/01/28/5c4e92b84f38a.png)  
+04.填写信息，如果只是测试可以随意填写  
+![极验流程.png](https://i.loli.net/2019/01/28/5c4e925425cbd.png)  
+05.得到ID和KEY，后续操作将用到  
+![极验流程2.png](https://i.loli.net/2019/01/28/5c4e9255bac9d.png)  
+
 ### 1.拷贝该users文件夹到你的Django根目录下或存放所有APP文件夹下
 ### 2.修改配置文件settings.py，把该app注册到INSTALLED_APPS中
 ```
