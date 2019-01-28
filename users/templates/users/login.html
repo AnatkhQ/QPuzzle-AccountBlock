@@ -1,0 +1,206 @@
+{% extends 'users_plus.html' %}
+{% load static %}
+
+{% block title %}
+    <title>登陆PLUS+</title>
+{% endblock %}
+{% block css %}
+    <style>
+        /* 极验验证的样式 */
+        #embed-captcha {
+            width: 300px;
+            margin: 0 auto;
+
+        }
+
+        .show {
+            display: block;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #notice {
+            color: red;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <form action="" novalidate>
+        {% csrf_token %}
+        <span class="login100-form-title p-b-49">登录</span>
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.auto_id }}" class="form_text_label">{{ field.label }}</label>
+                {{ field }}
+                <span class="ececk_warning error"></span>
+
+                {% if field.help_text %}
+                    <p class="help">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        {# 验证码开始 #}
+        <div class="form-group">
+            <div id="embed-captcha" style="width: 390px"></div>
+            <p id="wait" class="show">正在加载验证码......</p>
+            <p id="notice" class="hide">请先拖动验证码到相应位置</p>
+            <span class="ececk_warning error" id="id_verification"></span>
+        </div>
+        {# 验证码结束 #}
+
+        <div class="text-right p-t-8 p-b-31">
+            <a href="javascript:">忘记密码？</a>
+        </div>
+
+        <div class="container-login100-form-btn">
+            <div class="wrap-login100-form-btn">
+                <div class="login100-form-bgbtn"></div>
+                <input type="button" class="login100-form-btn " value="登 陆">
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+
+{% block login_register %}
+    <div class="flex-col-c p-t-25">
+        <a href="{% url 'users:register' %}" class="txt2">立即注册</a>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'users_plus/js/gt.js' %}"></script>
+    <script>
+        var handlerEmbed = function (captchaObj) {
+            //验证码展开开始
+            $("#embed-submit").click(function (e) {
+
+                var validate = captchaObj.getValidate();
+                if (!validate) {
+                    $("#notice")[0].className = "show";
+                    setTimeout(function () {
+                        $("#notice")[0].className = "hide";
+                    }, 1000);
+                    e.preventDefault();
+                }
+            });
+            // 将验证码加到id为captcha的元素里，同时会有三个input的值：geetest_challenge, geetest_validate, geetest_seccode
+            captchaObj.appendTo("#embed-captcha");
+            captchaObj.onReady(function () {
+                $("#wait")[0].className = "hide";
+            });
+            //验证码展开结束
+
+
+            $(".login100-form-btn").click(function () {
+                //captchaObj.getValidate()获取校验，用于判断是否进行了校验
+                if (captchaObj.getValidate()) {//已进行了滑动验证
+                    var validate = captchaObj.getValidate();
+                    $.ajax({
+                        url: "",
+                        type: "post",
+                        data: {
+                            csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val(),//一定要放在第一个，否则会发生恶心的bug
+                            username: $("[name='username']").val(),
+                            password: $("[name='password']").val(),
+                            geetest_challenge: validate.geetest_challenge,
+                            geetest_validate: validate.geetest_validate,
+                            geetest_seccode: validate.geetest_seccode
+                        },
+                        success: function (data) {
+                            if (data.user) {
+                                location.href = "/index/"//自行设置跳转URL
+                            }
+                            else {//失败
+                                //$(".error").html("");//每次点击后清空错误
+                                //$(".error").parent().removeClass("has-error");//每次点击后清空has-error(bootstrap自带属性，让边框变红)这个class
+                                //展现此次提交的错误信息，遍历data.msg,function(key,value){}
+                                $.each(data.msg, function (field, error_list) {
+
+                                    $("#id_" + field).next().html(error_list[0]);//找到id_key(user/pwd/re_pwd...)的下一个标签.next()
+                                    $("#id_" + field).parent().addClass("has-error");//拿到父标签，添加addclass("has-error")，输入框错误变红
+
+                                    //一秒后清空提醒
+                                    {#                            setTimeout(function () {//定时器#}
+                                    {#                                $(".error").text("")//由data.msg变成空字符串#}
+                                    {#                            }, 1000)#}
+                                })
+                            }
+                        }
+                    })
+
+                } else {//未进行滑动验证，需要进行滑动验证
+
+                    $.ajax({
+                        url: "",
+                        type: "post",
+                        data: {
+                            csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val(),//一定要放在第一个，否则会发生恶心的bug
+                            username: $("[name='username']").val(),
+                            password: $("[name='password']").val()
+                        },
+                        success: function (data) {
+                            if (data.user) {
+                                location.href = "/index/"//自行设置跳转URL
+                            }
+                            else {//失败
+                                if (data.msg.verification) {
+                                    $("#id_verification").html(data.msg.verification[0]);
+                                }
+                                $.each(data.msg, function (field, error_list) {
+                                    $("#id_" + field).next().html(error_list[0]);//找到id_key(user/pwd/re_pwd...)的下一个标签.next()
+                                    $("#id_" + field).parent().addClass("has-error");//拿到父标签，添加addclass("has-error")，输入框错误变红
+
+                                    //一秒后清空提醒
+                                    {#                                setTimeout(function () {//定时器#}
+                                    {#                                    $(".error").text("")//由data.msg变成空字符串#}
+                                    {#                                }, 1000)#}
+                                })
+                            }
+                        }
+                    })
+                }
+
+
+            });
+
+            // 当input框获取焦点时将之前的错误清空
+            $("#id_username").focus(function () {
+                // 将之前的错误清空
+                $(".error").html("");//每次点击后清空错误
+                $(".error").parent().removeClass("has-error");
+            });
+            $("#id_password").focus(function () {
+                // 将之前的错误清空
+                $(".error").html("");//每次点击后清空错误
+                $(".error").parent().removeClass("has-error");
+            });
+
+        };
+        //滑动验证码进行校验
+        $.ajax({
+            // 获取id，challenge，success（是否启用failback）
+            url: "/users/pc-geetest/register?t=" + (new Date()).getTime(), // 加随机数防止缓存
+            type: "get",
+            dataType: "json",
+            success: function (data) {
+                // 使用initGeetest接口
+                // 参数1：配置参数
+                // 参数2：回调，回调的第一个参数验证码对象，之后可以使用它做appendTo之类的事件
+                initGeetest({
+                    width: '100%',
+                    gt: data.gt,
+                    challenge: data.challenge,
+                    product: "embed", // 产品形式，包括：float，embed，popup。注意只对PC版验证码有效
+                    offline: !data.success // 表示用户后台检测极验服务器是否宕机，一般不需要关注
+                    // 更多配置参数请参见：http://www.geetest.com/install/sections/idx-client-sdk.html#config
+                }, handlerEmbed);
+            }
+        });
+    </script>
+
+{% endblock %}

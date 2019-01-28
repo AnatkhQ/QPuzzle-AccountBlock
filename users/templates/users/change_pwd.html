@@ -1,0 +1,137 @@
+{% extends 'users_plus.html' %}
+{% load static %}
+{% block title %}
+    <title>修改密码PLUS+</title>
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'bootstrapvalidator-master/dist/css/bootstrapValidator.css' %}">
+{% endblock %}
+
+{% block content %}
+    <form action="" id="form-val" novalidate>
+        {% csrf_token %}
+        <span class="login100-form-title p-b-49">修改密码</span>
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.auto_id }}" class="form_text_label">{{ field.label }}</label>
+                {{ field }}
+                <span class="ececk_warning error"></span>
+
+                {% if field.help_text %}
+                    <p class="help">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="container-login100-form-btn">
+            <div class="wrap-login100-form-btn">
+                <div class="login100-form-bgbtn"></div>
+                <input type="button" class="login100-form-btn " value="保 存">
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'bootstrapvalidator-master/dist/js/bootstrapValidator.js' %}"></script>
+    <script>
+        $(function () {
+            $('#form-val').bootstrapValidator({
+                excluded: [':disabled', ':hidden', 'csrfmiddlewaretoken'],
+                {#                submitButtons: '.login100-form-btn',#}
+                feedbackIcons: {//根据验证结果显示的各种图标
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    password1: {
+                        validators: {
+                            notEmpty: {message: '请输入旧密码'}
+                        }
+                    },
+                    password2: {
+                        validators: {
+                            notEmpty: {message: '密码不能为空'},
+                            different: {  //比较
+                                field: 'password1', //需要进行比较的input name值
+                                message: '密码不能相同'
+                            },
+                            callback: {
+                                callback: function (value, validator) {
+                                    // Check the password strength
+                                    if (value.length < 6) {
+                                        return {
+                                            valid: false,
+                                            message: '密码必须超过6个字符'
+                                        }
+                                    }
+
+                                    if (value === value.toLowerCase()) {
+                                        return {
+                                            valid: false,
+                                            message: '密码必须至少包含一个大写字符'
+                                        }
+                                    }
+                                    if (value === value.toUpperCase()) {
+                                        return {
+                                            valid: false,
+                                            message: '密码必须至少包含一个小写字符'
+                                        }
+                                    }
+                                    if (value.search(/[0-9]/) < 0) {
+                                        return {
+                                            valid: false,
+                                            message: '密码必须至少包含一位数字'
+                                        }
+                                    }
+                                    if (value.length > 15) {
+                                        return {
+                                            valid: false,
+                                            message: '密码不能超过15个字符'
+                                        }
+                                    }
+
+                                    return true;
+                                }
+                            }
+                        }
+                    },
+                    confirm_password: {
+                        validators: {
+                            notEmpty: {message: '请确认密码'},
+                            identical: {  //比较是否相同
+                                field: 'password2',  //需要进行比较的input name值
+                                message: '两次密码不一致'
+                            }
+                        }
+                    }
+                }
+            });
+            $(".login100-form-btn").click(function () {//非submit按钮点击后进行验证，如果是submit则无需此句直接验证
+                $("#form-val").bootstrapValidator('validate');//提交验证
+                if ($("#form-val").data('bootstrapValidator').isValid()) {//获取验证结果，如果成功，执行下面代码
+                    $.ajax({
+                        url: "",
+                        type: "post",
+                        data: $("#form-val").serialize(),
+                        success: function (data) {
+                            if (data.user) {
+                                location.href = "/accounts/login/"
+                            } else {
+                                $(".error").html("");
+                                $(".error").parent().removeClass("has-error");
+                                $(".error:first").html(data.msg);
+                                $(".error:first").parent().addClass("has-error");
+                            }
+
+                        }
+                    })
+                }
+            });
+
+        })
+
+    </script>
+{% endblock %}

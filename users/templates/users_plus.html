@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block title %}
+
+    {% endblock %}
+    <meta name="keywords" content="Django登陆组件"/>
+    <meta name="description" content="Django登陆组件"/>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'users_plus/vendor/bootstrap/css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'users_plus/fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'users_plus/fonts/iconic/css/material-design-iconic-font.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'users_plus/css/util.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'users_plus/css/main.css' %}">
+    {% block css %}
+    
+    {% endblock %}
+</head>
+
+<body>
+
+<div class="limiter">
+    <div class="container-login100" style="background-image: url('{% static 'users_plus/images/bg-01.jpg' %}');">
+        <div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
+        {% block content %}
+
+        {% endblock %}
+
+            {# 其他登录开始 #}
+            <div class="txt1 text-center p-t-54 p-b-20">
+                <span>第三方登录</span>
+            </div>
+
+            <div class="flex-c-m">
+                <a href="#" class="login100-social-item bg1">
+                    <i class="fa fa-wechat"></i>
+                </a>
+
+                <a href="#" class="login100-social-item bg2">
+                    <i class="fa fa-qq"></i>
+                </a>
+
+                <a href="#" class="login100-social-item bg3">
+                    <i class="fa fa-weibo"></i>
+                </a>
+            </div>
+            {# 其他登录结束 #}
+
+            {% block login_register %}
+
+            {% endblock %}
+
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'users_plus/vendor/jquery/jquery-3.2.1.min.js' %}"></script>
+<script src="{% static 'users_plus/vendor/bootstrap/js/bootstrap.js' %}"></script>
+</body>
+{% block js %}
+
+{% endblock %}
+</html>
